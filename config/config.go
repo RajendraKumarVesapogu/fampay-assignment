@@ -28,7 +28,7 @@ var (
 )
 
 var (
-	QUERY_TIMEOUT        = 30 * time.Second
+	QUERY_TIMEOUT        = 10 * time.Second
 	REDIS_TIMEOUT        = 1 * time.Second
 	YOUTUBE_SEARCH_QUERY = "news"
 )
@@ -54,10 +54,14 @@ func parseEnvs() {
 	Env = mustGetEnvVar("ENV")
 	Port = mustGetEnvVar("PORT")
 	DataDbPasswordSecretName = mustGetEnvVar("DATA_DB_PASSWORD_SECRET_NAME")
+	RedisUri = mustGetEnvVar("REDIS_URI")
 	dataDbPort := mustGetEnvVar("DATA_DB_PORT")
 	YoutubeApiKey1 = mustGetEnvVar("YOUTUBE_API_KEY1")
 	YoutubeApiKey2 = mustGetEnvVar("YOUTUBE_API_KEY2")
 	YoutubeApiKey3 = mustGetEnvVar("YOUTUBE_API_KEY3")
+	DataDbHost = mustGetEnvVar("DATA_DB_HOST")
+	DataDbPassword = mustGetEnvVar("DATA_DB_PASSWORD")
+	DataDbUser = mustGetEnvVar("DATA_DB_USER")
 	DataDbPort, err = strconv.Atoi(dataDbPort)
 	AllowedOrigins = []string{"*"}
 	if err != nil {
