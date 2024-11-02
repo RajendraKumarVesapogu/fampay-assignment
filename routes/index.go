@@ -9,8 +9,8 @@ import (
 func Router() *gin.Engine {
 	e := gin.New()
 
-	e.Use(middleware.Timeout())
 	e.Use(middleware.Cors())
+	e.Use(middleware.Timeout())
 	e.Use(
 		gin.LoggerWithWriter(gin.DefaultWriter),
 		gin.Recovery(),

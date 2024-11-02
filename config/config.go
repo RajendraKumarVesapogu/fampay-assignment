@@ -31,8 +31,17 @@ var (
 	QUERY_TIMEOUT        = 10 * time.Second
 	REDIS_TIMEOUT        = 1 * time.Second
 	YOUTUBE_SEARCH_QUERY = "news"
-	MAX_PAGINATION_SIZE  = 5
-	DATE_FORMAT		  	 = "2006-01-02T15:04:05Z"
+	MAX_PAGINATION_SIZE  = 10
+	DATE_FORMAT          = "2006-01-02T15:04:05Z"
+	CORS_ALLOWED_METHODS = []string{"GET", "POST", "PATCH", "OPTIONS"}
+	CORS_ALLOWED_HEADERS = []string{
+		"Origin",
+		"Content-Length",
+		"Content-Type",
+		"Authorization",
+		"Accept",
+		"Cookie",
+	}
 )
 
 func mustGetEnvVar(name string) string {

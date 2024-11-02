@@ -5,10 +5,10 @@ import (
 	"io"
 	"net/http"
 
-	"fampay-assignment/config"
 	"fampay-assignment/lib"
 	"fampay-assignment/logger"
-
+	"fampay-assignment/config"
+	
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	timeout "github.com/vearne/gin-timeout"
@@ -34,11 +34,13 @@ func RequestLogger() gin.HandlerFunc {
 
 
 func Cors() gin.HandlerFunc {
-	return cors.New(cors.Config{
-		AllowOrigins:     config.AllowedOrigins,
+    return cors.New(cors.Config{
+        AllowOrigins:     config.AllowedOrigins,
+		AllowMethods:     config.CORS_ALLOWED_METHODS,
+		AllowHeaders:     config.CORS_ALLOWED_HEADERS,
 		AllowCredentials: true,
 		AllowWildcard:    true,
-	})
+    })
 }
 
 func Timeout() gin.HandlerFunc {
