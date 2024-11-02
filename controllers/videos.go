@@ -48,32 +48,39 @@ func GetLatestVideos(
 	return res, nil
 
 }
-// func GetSegmentAcrossModules(
-// 	ctx *gin.Context,
-// 	db *pgxpool.Pool,
-// ) (interface{}, error) {
-// 	name := "GetSegmentAcrossModules"
 
-// 	var data externalTypes.GetSegmentAcrossModulesRequest
-// 	ctx.BindJSON(&data)
-// 	err := data.Validate()
-// 	if err != nil {
-// 		logger.Log.WithFields(logrus.Fields{
-// 			"controller": name,
-// 			"data":       data,
-// 			"err":        err,
-// 		}).Error("invalid request")
-// 		return lib.ApiResponse{}, lib.NewExternalError().BadRequest(err.Error())
-// 	}
+func AddYoutubeAPIKey(
+	ctx *gin.Context,
+	db *pgxpool.Pool,
+) (interface{}, error) {
+	name := "AddYoutubeAPIKey"
 
-// 	res, err := services.GetSegmentAcrossModules(db, &data)
-// 	if err != nil {
-// 		logger.Log.WithFields(logrus.Fields{
-// 			"controller": name,
-// 			"err":        err,
-// 		}).Error("error getting segment across modules")
-// 		return lib.ApiResponse{}, err
-// 	}
+	var data types.AddYoutubeAPIKeyRequest
+	err := ctx.ShouldBindJSON(&data)
+	if err != nil {
+		logger.Log.WithFields(logrus.Fields{
+			"controller": name,
+			"err":        err,
+		}).Error("invalid request")
+		return lib.ApiResponse{}, lib.NewExternalError().BadRequest(err.Error())
+	}
+	err = data.Validate()
+	if err != nil {
+		logger.Log.WithFields(logrus.Fields{
+			"controller": name,
+			"data":       data,
+			"err":        err,
+		}).Error("invalid request")
+		return lib.ApiResponse{}, lib.NewExternalError().BadRequest(err.Error())
+	}
+	response, err := services.AddYoutubeAPIKey(db,&data)
+	if err != nil {
+		logger.Log.WithFields(logrus.Fields{
+			"controller": name,
+			"err":        err,
+		}).Error("error adding youtube api key")
+		return response, err
+	}
+	return response, nil
 
-// 	return res, nil
-// }
+}

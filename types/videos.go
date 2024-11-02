@@ -26,3 +26,17 @@ func (req GetLatestVideosRequest) Validate() error {
 type GetLatestVideosResponse struct {
 	Videos []models.Video `json:"videos"`
 }
+
+type AddYoutubeAPIKeyRequest struct {
+	ApiKey string
+}
+
+type AddYoutubeAPIKeyResponse struct {
+	Success bool `json:"success"`
+}
+
+func (req AddYoutubeAPIKeyRequest) Validate() error {
+	return validation.ValidateStruct(&req,
+		validation.Field(&req.ApiKey, validation.Required),
+	)
+}

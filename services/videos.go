@@ -50,3 +50,26 @@ func GetLatestVideos(
 	}
 	return response, err
 }
+
+func AddYoutubeAPIKey(
+	db *pgxpool.Pool,
+	params *types.AddYoutubeAPIKeyRequest,
+) (
+	response types.AddYoutubeAPIKeyResponse,
+	err error,
+) {
+	err = params.Validate()
+	if err != nil {
+		logger.Log.WithFields(logger.Fields{
+			"params": params,
+		}).Error(err)
+		return response, lib.NewExternalError().BadRequest(err.Error())
+	}
+	response.Success, err = lib.AddKey(params.ApiKey)
+	if err != nil {
+		logger.Log.WithFields(logger.Fields{
+			"params": params,
+		}).Error(err)
+	}
+	return response, err
+}

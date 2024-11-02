@@ -14,5 +14,9 @@ func Videos(engine *gin.Engine) *gin.Engine {
 		lib.ControllerWrapper(ctx, "GetLatestVideos", controllers.GetLatestVideos)
 	})
 
+	videos.POST("/key", func(ctx *gin.Context) {
+		lib.ControllerWrapper(ctx, "AddYoutubeAPIKey", controllers.GetLatestVideos)
+	})
+
 	return engine
 }
