@@ -63,7 +63,6 @@ func parseEnvs() {
 	}
 
 	Port = mustGetEnvVar("PORT")
-	DataDbPasswordSecretName = mustGetEnvVar("DATA_DB_PASSWORD_SECRET_NAME")
 	RedisUri = mustGetEnvVar("REDIS_URI")
 	dataDbPort := mustGetEnvVar("DATA_DB_PORT")
 	YoutubeApiKey1 = mustGetEnvVar("YOUTUBE_API_KEY1")
