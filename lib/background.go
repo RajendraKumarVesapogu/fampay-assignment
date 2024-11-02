@@ -71,8 +71,20 @@ func (k *APIKeys) nextKey() (string, error) {
 	return k.keys[k.currKey], nil
 }
 
-func (k *APIKeys) currentKey() string {
-	return k.keys[k.currKey]
+func (k *APIKeys) currentKey() (string, error) {
+	if len(k.keys) == 0 {
+		return "", errors.New("no API keys available")
+	}
+	return k.keys[k.currKey], nil
+}
+
+func (k *APIKeys) removeCurrentKey() {
+	if len(k.keys) > 0 {
+		k.keys = append(k.keys[:k.currKey], k.keys[k.currKey+1:]...)
+		if k.currKey >= len(k.keys) {
+			k.currKey = 0
+		}
+	}
 }
 
 func AddKey(newKey string) (bool, error) {
@@ -89,7 +101,7 @@ func AddKey(newKey string) (bool, error) {
 	}
 	
 	if newKey == "" {
-		return false,errors.New("new API key is empty")
+		return false, errors.New("new API key is empty")
 	}
 
 	ApiKeys.keys = append(ApiKeys.keys, newKey)
@@ -100,11 +112,7 @@ func NewAPIKeys(keys []string) *APIKeys {
 	return &APIKeys{keys: keys, currKey: 0}
 }
 
-func executeQuery(
-	db *pgxpool.Pool,
-	query string,
-	queryArgs ...interface{},
-) error {
+func executeQuery(db *pgxpool.Pool, query string, queryArgs ...interface{}) error {
 	ctx, cancel := context.WithTimeout(context.Background(), dbOperationTimeout)
 	defer cancel()
 
@@ -131,75 +139,76 @@ func fetchAndStoreVideos(searchQuery string, db *pgxpool.Pool, publishedAfter ti
 	ctx, cancel := context.WithTimeout(context.Background(), httpTimeout)
 	defer cancel()
 
-	for {
-		apiKey := ApiKeys.currentKey()
-		publishedAfterStr := publishedAfter.UTC().Format("2006-01-02T15:04:05Z")
-		url := fmt.Sprintf("https://www.googleapis.com/youtube/v3/search?key=%s&part=snippet&type=video&order=date&q=%s&publishedAfter=%s",
-			apiKey, searchQuery, publishedAfterStr)
+	apiKey, err := ApiKeys.currentKey()
+	if err != nil {
+		return err
+	}
+	publishedAfterStr := publishedAfter.UTC().Format("2006-01-02T15:04:05Z")
+	url := fmt.Sprintf("https://www.googleapis.com/youtube/v3/search?key=%s&part=snippet&type=video&order=date&q=%s&publishedAfter=%s",
+		apiKey, searchQuery, publishedAfterStr)
 
-		req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return fmt.Errorf("error creating request: %v", err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		logger.Log.Printf("Request error with key %s: %v. Switching key...", apiKey, err)
+		ApiKeys.removeCurrentKey()
+		return err
+	}
+	defer resp.Body.Close()
+
+	var ytResponse YouTubeResponse
+	if err := json.NewDecoder(resp.Body).Decode(&ytResponse); err != nil {
+		return fmt.Errorf("error decoding YouTube API response: %v", err)
+	}
+
+	if ytResponse.Error.Code == 403 && ytResponse.Error.Errors[0].Reason == "quotaExceeded" {
+		logger.Log.Printf("Quota exceeded for key. Switching to next key...")
+		_, err := ApiKeys.nextKey()
 		if err != nil {
-			return fmt.Errorf("error creating request: %v", err)
+			logger.Log.Println("All API keys are exhausted.")
+			return err
+		}
+		return errors.New("quota exceeded, switching key")
+	} else if ytResponse.Error.Code >=400 && ytResponse.Error.Code <= 500 {
+		logger.Log.Printf("Error in YouTube API response: %s. Removing key and switching...", ytResponse.Error.Message)
+		ApiKeys.removeCurrentKey()
+		return fmt.Errorf("API error: %s", ytResponse.Error.Message)
+	}
+
+	for _, item := range ytResponse.Items {
+		video := models.Video{
+			VideoID:      item.ID.VideoID,
+			Title:        item.Snippet.Title,
+			Description:  item.Snippet.Description,
+			PublishedAt:  item.Snippet.PublishedAt,
+			ThumbnailURL: item.Snippet.Thumbnails.High.URL,
+			ChannelTitle: item.Snippet.ChannelTitle,
+			ChannelID:    item.Snippet.ChannelID,
 		}
 
-		resp, err := http.DefaultClient.Do(req)
+		queryTemplate := `
+			INSERT INTO videos (
+				video_id, title, description, published_at, 
+				thumbnail_url, channel_title, channel_id
+			)
+			VALUES ($1, $2, $3, $4, $5, $6, $7)
+			ON CONFLICT (video_id) DO NOTHING`
+
+		err = executeQuery(db, queryTemplate,
+			video.VideoID, video.Title, video.Description,
+			video.PublishedAt, video.ThumbnailURL,
+			video.ChannelTitle, video.ChannelID)
+
 		if err != nil {
-			return fmt.Errorf("error sending request to YouTube API: %v", err)
-		}
-		defer resp.Body.Close()
-
-		var ytResponse YouTubeResponse
-		if err := json.NewDecoder(resp.Body).Decode(&ytResponse); err != nil {
-			return fmt.Errorf("error decoding YouTube API response: %v", err)
-		}
-
-		if ytResponse.Error.Code == 403 && ytResponse.Error.Errors[0].Reason == "quotaExceeded" {
-			logger.Log.Printf("Quota exceeded for key. Switching to next key...")
-			_, err := ApiKeys.nextKey()
-			if err != nil {
-				logger.Log.Println("All API keys are exhausted.")
-				return err
-			}
+			logger.Log.Printf("Failed to insert video %s: %v", video.VideoID, err)
 			continue
 		}
 
-		for _, item := range ytResponse.Items {
-			video := models.Video{
-				VideoID:      item.ID.VideoID,
-				Title:        item.Snippet.Title,
-				Description:  item.Snippet.Description,
-				PublishedAt:  item.Snippet.PublishedAt,
-				ThumbnailURL: item.Snippet.Thumbnails.High.URL,
-				ChannelTitle: item.Snippet.ChannelTitle,
-				ChannelID:    item.Snippet.ChannelID,
-			}
-
-			queryTemplate := `
-                INSERT INTO videos (
-                    video_id, title, description, published_at, 
-                    thumbnail_url, channel_title, channel_id
-                )
-                VALUES ($1, $2, $3, $4, $5, $6, $7)
-                ON CONFLICT (video_id) DO NOTHING`
-
-			err = executeQuery(db, queryTemplate,
-				video.VideoID, video.Title, video.Description,
-				video.PublishedAt, video.ThumbnailURL,
-				video.ChannelTitle, video.ChannelID)
-
-			if err != nil {
-				logger.Log.WithFields(logger.Fields{
-					"video_id": video.VideoID,
-					"error":    err,
-				}).Error("Failed to insert video")
-				continue
-			}
-
-			logger.Log.WithFields(logger.Fields{
-				"video_id": video.VideoID,
-			}).Info("Successfully inserted video")
-		}
-		break
+		logger.Log.Printf("Successfully inserted video %s", video.VideoID)
 	}
 	return nil
 }
@@ -223,6 +232,10 @@ func StartFetchingVideos(ctx context.Context) {
 			logger.Log.Info("Stopping video fetch service...")
 			return
 		case <-ticker.C:
+			for len(ApiKeys.keys) == 0 {
+				logger.Log.Warn("No API keys available, retrying in 10 seconds...")
+				time.Sleep(10 * time.Second)
+			}
 			if err := fetchAndStoreVideos(searchQuery, db, publishedAfter); err != nil {
 				logger.Log.WithError(err).Error("Error in fetchAndStoreVideos")
 				continue
@@ -235,8 +248,7 @@ func StartFetchingVideos(ctx context.Context) {
 func init() {
 	ctx := context.Background()
 	go func() {
-		time.Sleep(10 * time.Second)
+		time.Sleep(5 * time.Second)
 		StartFetchingVideos(ctx)
 	}()
 }
-

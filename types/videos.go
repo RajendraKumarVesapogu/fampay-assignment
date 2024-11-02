@@ -28,7 +28,7 @@ type GetLatestVideosResponse struct {
 }
 
 type AddYoutubeAPIKeyRequest struct {
-	ApiKey string
+	ApiKey string 	`json:"api_key"`
 }
 
 type AddYoutubeAPIKeyResponse struct {
