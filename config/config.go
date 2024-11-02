@@ -12,7 +12,6 @@ import (
 )
 
 var (
-	Env                      string
 	Port                     string
 	DataDbHost               string
 	DataDbUser               string
@@ -42,6 +41,7 @@ var (
 		"Accept",
 		"Cookie",
 	}
+	CACHE_TTL = 5 * time.Minute
 )
 
 func mustGetEnvVar(name string) string {
@@ -62,7 +62,6 @@ func parseEnvs() {
 		}).Warn("failed to load env file")
 	}
 
-	Env = mustGetEnvVar("ENV")
 	Port = mustGetEnvVar("PORT")
 	DataDbPasswordSecretName = mustGetEnvVar("DATA_DB_PASSWORD_SECRET_NAME")
 	RedisUri = mustGetEnvVar("REDIS_URI")

@@ -48,7 +48,7 @@ type GetLatestYouTubeVideoQueryResult struct {
 	Err    error
 }
 
-func GetLatestYouTubeVideoQuery(
+func getLatestYouTubeVideoQuery(
 	db *pgxpool.Pool,
 	params *GetLatestYouTubeVideoQueryParams,
 ) (response GetLatestYouTubeVideoQueryResult) {
@@ -97,6 +97,46 @@ func GetLatestYouTubeVideoQuery(
 			return response
 		}
 		response.Videos = append(response.Videos, video)
+	}
+
+	return response
+}
+
+func getLatestYouTubeVideoQueryCached(
+	db *pgxpool.Pool,
+	params *GetLatestYouTubeVideoQueryParams,
+) (response GetLatestYouTubeVideoQueryResult) {
+	return cacheQuery(
+		"GetLatestYouTubeVideoQuery",
+		getLatestYouTubeVideoQuery,
+		db,
+		params,
+	)
+}
+
+func getLatestYouTubeVideoQueryAsync(
+	db *pgxpool.Pool,
+	params *GetLatestYouTubeVideoQueryParams,
+	ch chan<- GetLatestYouTubeVideoQueryResult,
+) {
+	ch <- getLatestYouTubeVideoQueryCached(db, params)
+}
+
+func GetLatestYouTubeVideos(
+	db *pgxpool.Pool,
+	params *GetLatestYouTubeVideoQueryParams,
+) (response GetLatestYouTubeVideoQueryResult) {
+	if connections.RedisClient == nil {
+		return getLatestYouTubeVideoQueryCached(db, params)
+	}
+
+	videosChan := make(chan GetLatestYouTubeVideoQueryResult)
+	go getLatestYouTubeVideoQueryAsync(db, params, videosChan)
+
+	select {
+	case response = <-videosChan:
+	case <-time.After(2 * time.Second):
+		response.Err = fmt.Errorf("GetLatestYouTubeVideo timed out")
 	}
 
 	return response

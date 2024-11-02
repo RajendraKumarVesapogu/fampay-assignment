@@ -1,10 +1,11 @@
 package utils
 
 import (
+	"bytes"
 	"context"
-	"time"	
+	"encoding/gob"
+	"time"
 )
-
 
 func GetPaginationOffset(page int, size int) int {
 	return (page - 1) * size
@@ -21,4 +22,24 @@ func GetContextWithTimeout(ctx context.Context, timeout time.Duration) context.C
 	}()
 
 	return Ctx
+}
+
+func EncodeToGob(data any) ([]byte, error) {
+	var buffer bytes.Buffer
+	encoder := gob.NewEncoder(&buffer)
+	err := encoder.Encode(data)
+	if err != nil {
+		return nil, err
+	}
+	return buffer.Bytes(), nil
+}
+
+func DecodeFromGob(data []byte, result any) error {
+	buffer := bytes.NewBuffer(data)
+	decoder := gob.NewDecoder(buffer)
+	err := decoder.Decode(result)
+	if err != nil {
+		return err
+	}
+	return nil
 }
