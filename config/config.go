@@ -31,6 +31,8 @@ var (
 	QUERY_TIMEOUT        = 10 * time.Second
 	REDIS_TIMEOUT        = 1 * time.Second
 	YOUTUBE_SEARCH_QUERY = "news"
+	MAX_PAGINATION_SIZE  = 5
+	DATE_FORMAT		  	 = "2006-01-02T15:04:05Z"
 )
 
 func mustGetEnvVar(name string) string {

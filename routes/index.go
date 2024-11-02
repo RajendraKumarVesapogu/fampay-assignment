@@ -17,5 +17,7 @@ func Router() *gin.Engine {
 	)
 	e.Use(middleware.RequestLogger())
 
+	Videos(e)
+	
 	return e
 }

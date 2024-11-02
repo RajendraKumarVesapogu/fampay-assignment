@@ -51,7 +51,6 @@ func NewSuccessApiResponse(response any) ApiResponse {
 func ControllerWrapper(
 	ctx *gin.Context,
 	requestName string,
-	requestType string,
 	controller Controller,
 ) {
 	db, ok := connections.GetPostgresDb()
