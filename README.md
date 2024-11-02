@@ -201,7 +201,7 @@ Adds a new API key to be used for fetching videos.
 
 ```json
 {
-  "api_key": "AIzaSyCs3Uu6xPWaJgFeQX851CljtaXfULd-DkM"
+  "api_key": "xxxxxxxxxxxxxxxxxx"
 }
 ```
 
