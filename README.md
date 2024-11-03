@@ -244,7 +244,7 @@ Indicates if the key was successfully added.
 ## Notes
 
 - Ensure that the `api_key` provided in `/videos/key` endpoint is valid, as it will be used for subsequent API calls.
-- Dates for the `published_after` parameter must be in ISO 8601 format (e.g., `2024-11-01`).
+- Dates for the `published_after` parameter must be in RFC-3339 format (e.g., `2006-01-02T15:04:05Z`).
 
 ---
 
