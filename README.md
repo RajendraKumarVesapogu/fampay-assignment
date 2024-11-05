@@ -27,7 +27,7 @@ This API provides endpoints to fetch YouTube video data and manage API keys. It 
 ## Base URL
 
 ```
-http://http://13.202.201.248:3000/
+http://http://localhost:3000/
 ```
 
 ## Local Setup
@@ -264,7 +264,7 @@ Indicates if the key was successfully added.
    }
    ```
   ```cURL
-curl 'http://13.202.201.248:3000/videos/key' \
+curl 'http://localhost:3000/videos/key' \
   -H 'Accept: application/json' \
   -H 'Accept-Language: en-US,en;q=0.9,en-IN;q=0.8' \
   -H 'Connection: keep-alive' \
