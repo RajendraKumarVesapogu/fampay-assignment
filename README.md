@@ -10,13 +10,13 @@ API to fetch latest videos sorted in reverse chronological order of their publis
 (Indexing on video_id and published_at).
 
 - A GET API which returns the stored video data in a paginated response sorted in descending order of published datetime.
-- Dockerized and Deployed on AWS. used RDS postgres for scalability. http://13.202.201.248:3000 
+- Dockerized and Deployed on AWS. used RDS postgres for scalability. ( reached free tier limit. server and db will be up soon )
 
 - Added support for supplying multiple API keys so that if quota is exhausted on one, it automatically uses the next available key. User can send a new key using the API endpoint
 - Made a dashboard to view the stored videos with filters and sorting options. 
-link to dashboard https://main.d2unwkiq4klrzx.amplifyapp.com/
+link to dashboard ( reached free tier limit dashboard will be up soon )
 please note that front-end will only work if the insecure-content is allowed in your browser Privacy and Security settings
-![alt text](image.png)
+![image](image.png)
 
 
 This API provides endpoints to fetch YouTube video data and manage API keys. It includes:
@@ -93,8 +93,6 @@ To run the application locally, use the following command:
 go run main.go
 ```
 
-Make sure to replace `main.go` with the entry point of your application if it's named differently.
-
 ## Accessing the API
 
 Once the application is running, you can access the API at:
@@ -134,12 +132,12 @@ Fetches a list of YouTube videos based on query parameters, including pagination
 | `sort_order`      | string | Yes      | Specifies the sorting order for videos (e.g., `asc` or `desc`).                                |
 | `pagination_size` | int    | Yes      | The number of videos to retrieve per page.                                                     |
 | `pagination_page` | int    | Yes      | The page number to retrieve.                                                                   |
-| `published_after` | string | No       | The date filter for videos published after this date (ISO 8601 format). Defaults to today’s date. |
+| `published_after` | string | No       | The date filter for videos published after this date (RFC 3339 format eg. 2006-01-02T15:04:05Z). Defaults to today’s date. |
 
 #### Sample Request
 
 ```http
-GET http://13.202.201.248:3000/videos?sort_order=desc&pagination_size=10&pagination_page=1&published_after=2024-11-01
+GET http://localhost:3000/videos?sort_order=desc&pagination_size=10&pagination_page=1&published_after=2024-11-01
 ```
 
 #### Response
@@ -229,17 +227,6 @@ Indicates if the key was successfully added.
 }
 ```
 
----
-
-## Error Codes
-
-| Status Code | Description                    |
-|-------------|--------------------------------|
-| `200`       | Request was successful.        |
-| `400`       | Bad request due to validation. |
-| `500`       | Internal server error.         |
-
----
 
 ## Notes
 
@@ -255,6 +242,16 @@ Indicates if the key was successfully added.
    ```http
    GET /videos?sort_order=desc&pagination_size=5&pagination_page=1
    ```
+   ```cURL
+   curl 'http://localhost:3000/videos?sort_order=desc&pagination_size=10&pagination_page=1&published_after=2024-11-14T17%3A59%3A00Z' \
+   -H 'Accept: application/json' \
+   -H 'Accept-Language: en-US,en;q=0.9,en-IN;q=0.8' \
+   -H 'Connection: keep-alive' \
+   -H 'Origin: https://main.d2unwkiq4klrzx.amplifyapp.com' \
+   -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0'
+   ```
+
+   
 
 2. **Add a New API Key:**
 
@@ -266,3 +263,14 @@ Indicates if the key was successfully added.
      "api_key": "YOUR_NEW_API_KEY"
    }
    ```
+  ```cURL
+curl 'http://13.202.201.248:3000/videos/key' \
+  -H 'Accept: application/json' \
+  -H 'Accept-Language: en-US,en;q=0.9,en-IN;q=0.8' \
+  -H 'Connection: keep-alive' \
+  -H 'Content-Type: application/json' \
+  -H 'Origin: https://main.d2unwkiq4klrzx.amplifyapp.com' \
+  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0' \
+  --data-raw '{"api_key":"test-key"}' \
+  --insecure
+  ```
