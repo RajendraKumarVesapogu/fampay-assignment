@@ -57,6 +57,9 @@ Change into the project directory:
 ```bash
 cd fampay-assignment
 ```
+## Setting up the Database
+
+Create a table the schema provided in the videos_schema.sql file. Please note that the table name should be videos.
 
 ## Setting Up Environment Variables
 
