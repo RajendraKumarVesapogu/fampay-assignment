@@ -10,7 +10,7 @@ API to fetch latest videos sorted in reverse chronological order of their publis
 (Indexing on video_id and published_at).
 
 - A GET API which returns the stored video data in a paginated response sorted in descending order of published datetime.
-- Dockerized and Deployed on AWS. used RDS postgres for scalability. ( reached free tier limit. server and db will be up soon )
+- Dockerized and Deployed on AWS. used RDS postgres for scalability. http://3.108.83.52:3000/
 
 - Added support for supplying multiple API keys so that if quota is exhausted on one, it automatically uses the next available key. User can send a new key using the API endpoint
 - Made a dashboard to view the stored videos with filters and sorting options. 
@@ -27,7 +27,7 @@ This API provides endpoints to fetch YouTube video data and manage API keys. It 
 ## Base URL
 
 ```
-http://http://localhost:3000/
+http://3.108.83.52:3000/
 ```
 
 ## Local Setup
