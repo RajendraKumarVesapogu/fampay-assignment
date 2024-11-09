@@ -1,154 +1,164 @@
-
-# Video Fetcher API - Fampay Intern Assignment
-
-
-API to fetch latest videos sorted in reverse chronological order of their publishing date-time from YouTube for a given tag/search query in a paginated response.
-
-## Implemented Features:
-
-- Server calls the YouTube API continuously in background (async) with some interval (say 10 seconds) for fetching the latest videos for a predefined search query("news") and stores the data of videos (specifically these fields - Video title, description, publishing datetime, thumbnails URLs and any other fields you require) in postgres database with proper indexes
-(Indexing on video_id and published_at).
-
-- A GET API which returns the stored video data in a paginated response sorted in descending order of published datetime.
-- Dockerized and Deployed on AWS. used RDS postgres for scalability. http://3.108.83.52:3000/
-
-- Added support for supplying multiple API keys so that if quota is exhausted on one, it automatically uses the next available key. User can send a new key using the API endpoint
-- Made a dashboard to view the stored videos with filters and sorting options. 
-link to dashboard ( reached free tier limit dashboard will be up soon )
-please note that front-end will only work if the insecure-content is allowed in your browser Privacy and Security settings
-![image](image.png)
+# YouTube Video Fetcher
 
 
-This API provides endpoints to fetch YouTube video data and manage API keys. It includes:
+A full-stack application that fetches and stores YouTube videos based on search queries, providing a clean dashboard interface for viewing and filtering videos. The system includes an automated background service for continuous video fetching and a scalable API infrastructure.
 
-1. `/videos` - Fetches a paginated list of YouTube videos.
-2. `/videos/key` - Allows adding a new API key for video fetching.
+## 🌟 Features
 
-## Base URL
+### Backend
+- ⚡ Asynchronous YouTube API integration with 10-second refresh interval
+- 🔄 Automatic API key rotation system
+- 📊 PostgreSQL database with optimized indexing
+- 🐳 Docker containerization
+- ☁️ AWS deployment with RDS
+- 📝 RESTful API with pagination support
 
+### Frontend
+- 📱 Responsive React dashboard
+- 🎯 Advanced filtering capabilities
+- ⏱️ Real-time sorting options
+- 🔑 Dynamic API key management
+- 🚀 Built with Vite for optimal performance
+- Find the repository here https://github.com/RajendraKumarVesapogu/fampay-assignment-frontend.git
+
+## 🛠️ Technology Stack
+
+- **Backend**: Go
+- **Frontend**: React + Vite
+- **Database**: PostgreSQL
+- **Deployment**: AWS, Docker
+- **API**: YouTube Data API v3
+
+## 🚀 Quick Start
+
+### Backend Setup
+
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/RajendraKumarVesapogu/fampay-assignment.git
+   cd fampay-assignment
+   ```
+
+2. **Configure Environment Variables**
+   Create a `.env` file in the root directory:
+   ```env
+   DB_HOST=your_database_host
+   DB_PORT=your_database_port
+   DB_USER=your_database_user
+   DB_PASSWORD=your_database_password
+   DB_NAME=your_database_name
+   GIN_MODE="release"
+   ALLOWED_ORIGINS="*"
+   REDIS_URI="redis://localhost:6379"
+   PORT=3000
+   YOUTUBE_API_KEY1=your_youtube_api_key1
+   YOUTUBE_API_KEY2=your_youtube_api_key2
+   YOUTUBE_API_KEY3=your_youtube_api_key3
+   ```
+
+3. **Database Setup**
+   - Execute the schema from `videos_schema.sql`
+   - Ensure the table name is set to `videos`
+
+4. **Install Dependencies and Run**
+   ```bash
+   go mod tidy
+   go run main.go
+   ```
+
+### Frontend Setup
+
+1. **Clone the Frontend Repository**
+   ```bash
+   git clone https://github.com/RajendraKumarVesapogu/fampay-assignment-frontend.git
+   cd fampay-assignment-frontend
+   ```
+
+2. **Install Dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Start Development Server**
+   ```bash
+   npm run dev
+   ```
+
+   Access the application at `http://localhost:5173`
+
+
+## 📡 API Documentation
+
+### Base URL
 ```
 http://3.108.83.52:3000/
 ```
 
-## Local Setup
+### Endpoints
 
-
-This guide will help you set up the Fampay Video Fetcher locally on your machine.
-
-## Prerequisites
-
-Before you begin, ensure you have the following installed:
-
-- Go (version 1.16 or later)
-
-## Cloning the Repository
-
-To get started, clone the repository to your local machine. Open your terminal and run:
-
-```bash
-git clone https://github.com/RajendraKumarVesapogu/fampay-assignment.git
-```
-
-
-## Navigating to the Project Directory
-
-Change into the project directory:
-
-```bash
-cd fampay-assignment
-```
-## Setting up the Database
-
-Create a table the schema provided in the videos_schema.sql file. Please note that the table name should be videos.
-
-## Setting Up Environment Variables
-
-The application requires specific environment variables to run. Create a `.env` file in the project root and set the required variables. Below is an example of what to include:
-
-```bash
-# .env
-DB_HOST=your_database_host            # e.g., localhost
-DB_PORT=your_database_port            # e.g., 5432
-DB_USER=your_database_user            # e.g., postgres
-DB_PASSWORD=your_database_password    # e.g., password
-DB_NAME=your_database_name            # e.g., fampay_db
-PORT=3000                           # Port on which the server will run
-YOUTUBE_API_KEY1=<your_youtube_api_key>
-YOUTUBE_API_KEY2=<your_youtube_api_key>
-YOUTUBE_API_KEY3=<your_youtube_api_key>
-```
-
-Make sure to replace `<your_youtube_api_key>` with your actual YouTube API key.
-
-## Installing Dependencies
-
-Before running the application, you need to install the necessary Go dependencies. Run the following command:
-
-```bash
-go mod tidy
-```
-
-## Running the Application Locally
-
-To run the application locally, use the following command:
-
-```bash
-go run main.go
-```
-
-## Accessing the API
-
-Once the application is running, you can access the API at:
-
-```
-http://localhost:3000/
-```
-
-### Example API Calls
-
-- **Fetch Videos:**
-  ```
-  GET http://localhost:3000/videos?sort_order=desc&pagination_size=10&pagination_page=1
-  ```
-
-- **Add API Key:**
-  ```
-  POST http://localhost:3000/videos/key
-  {
-    "api_key": "YOUR_NEW_API_KEY"
-  }
-  ```
-
-
-
-
-## Endpoints
-
-### 1. GET `/videos`
-
-Fetches a list of YouTube videos based on query parameters, including pagination and optional filters.
-
-#### Query Parameters
-
-| Parameter         | Type   | Required | Description                                                                                     |
-|-------------------|--------|----------|-------------------------------------------------------------------------------------------------|
-| `sort_order`      | string | Yes      | Specifies the sorting order for videos (e.g., `asc` or `desc`).                                |
-| `pagination_size` | int    | Yes      | The number of videos to retrieve per page.                                                     |
-| `pagination_page` | int    | Yes      | The page number to retrieve.                                                                   |
-| `published_after` | string | No       | The date filter for videos published after this date (RFC 3339 format eg. 2006-01-02T15:04:05Z). Defaults to today’s date. |
-
-#### Sample Request
-
+#### 1. Get Videos
 ```http
-GET http://localhost:3000/videos?sort_order=desc&pagination_size=10&pagination_page=1&published_after=2024-11-01
+GET /videos
 ```
 
-#### Response
+**Query Parameters**
 
-The response contains the list of videos matching the query parameters.
+| Parameter         | Type   | Required | Description                               |
+|------------------|--------|----------|-------------------------------------------|
+| sort_order       | string | Yes      | Sort order (asc/desc)                     |
+| pagination_size  | int    | Yes      | Items per page (max 10)                   |
+| pagination_page  | int    | Yes      | Page number                               |
+| published_after  | string | No       | Filter by date (RFC 3339 format)          |
 
-##### Successful Response
+**Example Requests:**
 
+<details>
+<summary>cURL</summary>
+
+```bash
+curl 'http://3.108.83.52:3000/videos?sort_order=desc&pagination_size=10&pagination_page=1&published_after=2024-11-14T17:59:00Z' \
+  -H 'Accept: application/json' \
+  -H 'Content-Type: application/json'
+```
+</details>
+
+<details>
+<summary>JavaScript Fetch</summary>
+
+```javascript
+const params = new URLSearchParams({
+  sort_order: 'desc',
+  pagination_size: '10',
+  pagination_page: '1',
+  published_after: '2024-11-14T17:59:00Z'
+});
+
+fetch(`http://3.108.83.52:3000/videos?${params}`, {
+  method: 'GET',
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  }
+})
+.then(response => response.json())
+.then(data => console.log(data))
+.catch(error => console.error('Error:', error));
+```
+</details>
+
+<details>
+<summary>Postman</summary>
+
+```plaintext
+GET http://3.108.83.52:3000/videos?sort_order=desc&pagination_size=10&pagination_page=1&published_after=2024-11-14T17:59:00Z
+
+Headers:
+Accept: application/json
+Content-Type: application/json
+```
+</details>
+
+**Sample Response:**
 ```json
 {
   "error": false,
@@ -156,62 +166,82 @@ The response contains the list of videos matching the query parameters.
     "videos": [
       {
         "VideoID": "1l_w5g7fbjA",
-        "Title": "LIVE | Punjab Latest News 24x7 | Air pollution | Bhagwant Mann | Anmol Bishnoi | PM Modi | News18",
-        "Description": "ਤੁਹਾਡੇ ਸ਼ਹਿਰ, ਇਲਾਕੇ ਤੇ ਪਿੰਡ ਦੀ ਹਰ ਖ਼ਬਰ 'ਤੇ ਨਜ਼ਰ। ਦੇਖੋ, ਸਿਰਫ਼ News18 Punjab ...",
+        "Title": "Sample Video Title",
+        "Description": "Video description here...",
         "PublishedAt": "2024-11-02T09:13:49Z",
         "ThumbnailURL": "https://i.ytimg.com/vi/1l_w5g7fbjA/default.jpg",
-        "ChannelTitle": "News18 Punjab",
+        "ChannelTitle": "Channel Name",
         "ChannelID": "UC-crZTQNRzZgzyighTKF0nQ"
-      },
-      {
-        "VideoID": "aGin5L80RII",
-        "Title": "দুপুরের সময় | দুপুর ২টা | ২ নভেম্বর ২০২৪ | Somoy TV Bulletin 2pm| Latest Bangladeshi News",
-        "Description": "bdpolitics #bnp #topnews #uselection #somoytvbulletin দুপুরের সময় | দুপুর ২টা | ২ নভেম্বর ...",
-        "PublishedAt": "2024-11-02T09:11:17Z",
-        "ThumbnailURL": "https://i.ytimg.com/vi/aGin5L80RII/default.jpg",
-        "ChannelTitle": "SOMOY TV Bulletin",
-        "ChannelID": "UCNUFterLJ9vpFZZ0try7sLA"
       }
     ]
   }
 }
 ```
 
-##### Error Response
+#### 2. Add API Key
+```http
+POST /videos/key
+```
 
+**Request Body**
 ```json
 {
-  "error": true,
-  "message": "pagination_size: must be no greater than 10."
+  "api_key": "your_youtube_api_key"
 }
 ```
 
----
+**Example Requests:**
 
-### 2. POST `/videos/key`
+<details>
+<summary>cURL</summary>
 
-Adds a new API key to be used for fetching videos.
+```bash
+curl 'http://3.108.83.52:3000/videos/key' \
+  -X POST \
+  -H 'Accept: application/json' \
+  -H 'Content-Type: application/json' \
+  --data-raw '{"api_key":"your_youtube_api_key"}'
+```
+</details>
 
-#### Request Body
+<details>
+<summary>JavaScript Fetch</summary>
 
-| Parameter | Type   | Required | Description                        |
-|-----------|--------|----------|------------------------------------|
-| `api_key` | string | Yes      | The API key to add to the service. |
+```javascript
+fetch('http://3.108.83.52:3000/videos/key', {
+  method: 'POST',
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    api_key: 'your_youtube_api_key'
+  })
+})
+.then(response => response.json())
+.then(data => console.log(data))
+.catch(error => console.error('Error:', error));
+```
+</details>
 
-##### Sample Request
+<details>
+<summary>Postman</summary>
 
-```json
+```plaintext
+POST http://3.108.83.52:3000/videos/key
+
+Headers:
+Accept: application/json
+Content-Type: application/json
+
+Body (raw JSON):
 {
-  "api_key": "xxxxxxxxxxxxxxxxxx"
+  "api_key": "your_youtube_api_key"
 }
 ```
+</details>
 
-#### Response
-
-Indicates if the key was successfully added.
-
-##### Successful Response
-
+**Sample Response:**
 ```json
 {
   "error": false,
@@ -221,59 +251,49 @@ Indicates if the key was successfully added.
 }
 ```
 
-##### Error Response
+### Testing with HTTPie
+If you prefer using HTTPie, here are the equivalent commands:
 
-```json
-{
-  "error": true,
-  "message": "Invalid API key format"
-}
+```bash
+# Get Videos
+http GET 'http://3.108.83.52:3000/videos?sort_order=desc&pagination_size=10&pagination_page=1&published_after=2024-11-14T17:59:00Z'
+
+# Add API Key
+http POST http://3.108.83.52:3000/videos/key api_key=your_youtube_api_key
 ```
 
 
-## Notes
 
-- Ensure that the `api_key` provided in `/videos/key` endpoint is valid, as it will be used for subsequent API calls.
-- Dates for the `published_after` parameter must be in RFC-3339 format (e.g., `2006-01-02T15:04:05Z`).
 
----
 
-## Example Usage
 
-1. **Fetch Videos Sorted by Date (Newest First):**
 
-   ```http
-   GET /videos?sort_order=desc&pagination_size=5&pagination_page=1
-   ```
-   ```cURL
-   curl 'http://localhost:3000/videos?sort_order=desc&pagination_size=10&pagination_page=1&published_after=2024-11-14T17%3A59%3A00Z' \
-   -H 'Accept: application/json' \
-   -H 'Accept-Language: en-US,en;q=0.9,en-IN;q=0.8' \
-   -H 'Connection: keep-alive' \
-   -H 'Origin: https://main.d2unwkiq4klrzx.amplifyapp.com' \
-   -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0'
-   ```
 
-   
 
-2. **Add a New API Key:**
 
-   ```http
-   POST /videos/key
-   Content-Type: application/json
 
-   {
-     "api_key": "YOUR_NEW_API_KEY"
-   }
-   ```
-  ```cURL
-curl 'http://localhost:3000/videos/key' \
-  -H 'Accept: application/json' \
-  -H 'Accept-Language: en-US,en;q=0.9,en-IN;q=0.8' \
-  -H 'Connection: keep-alive' \
-  -H 'Content-Type: application/json' \
-  -H 'Origin: https://main.d2unwkiq4klrzx.amplifyapp.com' \
-  -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0' \
-  --data-raw '{"api_key":"test-key"}' \
-  --insecure
-  ```
+
+
+## 🌐 Live Deployments
+
+- **Frontend Dashboard**: [https://main.d3s4vg61cjppvr.amplifyapp.com/](https://main.d3s4vg61cjppvr.amplifyapp.com/)
+- **Backend API**: [http://3.108.83.52:3000/](http://3.108.83.52:3000/)
+
+## ⚠️ Important Notes
+
+- Enable insecure content in browser settings for the frontend dashboard
+- Adjust the date filter if no videos are visible initially
+- API keys are automatically rotated when quotas are exhausted. Add a new key to start fetching latest videos immediately,
+
+
+## 👨‍💻 Author
+
+Rajendra Kumar Vesapogu
+
+## 🛠️ Tools refs used
+
+- YouTube Data API
+- AWS Services
+- Stack Overflow, Go, React and Vite communities
+- Claude and GPT
+- Youtube and Official docs
